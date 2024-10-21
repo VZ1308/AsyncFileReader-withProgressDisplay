@@ -55,23 +55,23 @@ namespace AsyncProgramming.Controllers
                 }
                 else if (choice == "no")
                 {
-                    Console.WriteLine("Inhalte werden nicht angezeigt.");
+                    Console.WriteLine("Contents will not be displayed.");
                 }
                 else
                 {
-                    Console.WriteLine("Ungültige Eingabe. Bitte geben Sie 'Yes' oder 'No' ein.");
+                    Console.WriteLine("Invalid input. Please enter 'Yes' or 'No'.");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Es ist ein Fehler aufgetreten: " + ex.Message);
+                Console.WriteLine("Error: " + ex.Message);
             }
         }
 
         // Methode zur Anzeige des Dateiinhalts
         private void ShowFileContents()
         {
-            Console.WriteLine("Inhalt der Datei:");
+            Console.WriteLine("Contents of the file:");
             foreach (var line in _fileModel.Lines)
             {
                 Console.WriteLine(line); // Jede Zeile wird in Konsole angezeigt
