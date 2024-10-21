@@ -16,8 +16,8 @@ namespace AsyncFileReader
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                openFileDialog.Filter = "Textdateien (*.txt)|*.txt|Alle Dateien (*.*)|*.*";
-                openFileDialog.Title = "Wählen Sie eine Textdatei aus";
+                openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                openFileDialog.Title = "Select a text file";
 
                 // Datei-Auswahl über OpenFileDialog
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -26,7 +26,7 @@ namespace AsyncFileReader
                 }
                 else
                 {
-                    Console.WriteLine("Keine Datei ausgewählt.");
+                    Console.WriteLine("No data selected.");
                     return; // Beende, wenn keine Datei ausgewählt wurde
                 }
             }
