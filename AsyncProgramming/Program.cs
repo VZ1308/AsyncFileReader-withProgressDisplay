@@ -7,33 +7,27 @@ namespace AsyncFileReader
 {
     class Program
     {
-        [STAThread] // STA-Thread-Attribut hinzufügen
-        static void Main(string[] args) // Entferne async
+        [STAThread] // STA-Thread-Attribut für Windows Forms benötigt
+        static void Main(string[] args)
         {
-            string filePath = null;
+            // Verschiebe den OpenFileDialog in eine eigene Methode
+            string filePath = FileController.SelectFile();
 
-            // OpenFileDialog muss in einem synchronen STA-Thread aufgerufen werden
-            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            if (string.IsNullOrEmpty(filePath))
             {
-                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
-                openFileDialog.Title = "Select a text file";
-
-                // Datei-Auswahl über OpenFileDialog
-                if (openFileDialog.ShowDialog() == DialogResult.OK)
-                {
-                    filePath = openFileDialog.FileName;
-                }
-                else
-                {
-                    Console.WriteLine("No data selected.");
-                    return; // Beende, wenn keine Datei ausgewählt wurde
-                }
+                Console.WriteLine("No file selected.");
+                return; // Beende das Programm, wenn keine Datei ausgewählt wurde
             }
 
-            // Starte den asynchronen Leseprozess nach der Dateiauswahl
+            // Erstelle die Instanz von FileController für asynchrone Operationen
             var controller = new FileController();
+
+            // Starte den asynchronen Leseprozess nach der Dateiauswahl
             Task.Run(async () => await controller.LoadFileAsync(filePath)).GetAwaiter().GetResult();
+
+            Console.WriteLine("Drücken Sie eine beliebige Taste, um das Programm zu beenden...");
+            Console.ReadKey();  // Wartet, bis eine Taste gedrückt wird
+
         }
     }
 }

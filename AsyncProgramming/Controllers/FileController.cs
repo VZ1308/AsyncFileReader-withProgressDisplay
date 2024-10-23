@@ -2,11 +2,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace AsyncProgramming.Controllers
 {
     /// <summary>
-    /// Klasse die für das Laden von dateien und das Verwalten des Dateiinhalts zuständig ist
+    /// Klasse die für das Laden von Dateien und das Verwalten des Dateiinhalts zuständig ist
     /// </summary>
     public class FileController
     {
@@ -19,9 +20,10 @@ namespace AsyncProgramming.Controllers
         }
 
         // Asynchrone Methode zum Laden der Datei
-        public async Task LoadFileAsync(string filePath)
+        public async Task LoadFileAsync(string filePath) // Task steht für eine asynchrone Operation:
+                                                         // Es kann z.B. das Einlesen einer Datei oder das Abrufen von Daten aus dem Internet darstellen
         {
-            _fileModel.FilePath = filePath;
+            _fileModel.FilePath = filePath; //Pfad wird in _fileModel gespeichert
 
             // Berechne die Gesamtzahl der Zeilen vorab, um den Fortschritt zu berechnen
             int totalLines = CountTotalLines(filePath);
@@ -38,38 +40,52 @@ namespace AsyncProgramming.Controllers
                 await Task.Delay(500); // Warte 500 ms
             }
 
+            // ToDo: do while
             // Warten auf den Abschluss des Lesevorgangs
             await readingTask;
             Console.WriteLine("Reading finished.");
-            Console.WriteLine("Do you want to show the data? (Yes/No):");
+            
+            string choice;
+            bool isValidInput = false; // Variable, um zu überprüfen, ob die Eingabe gültig ist
 
-            try
+            do
             {
-                string choice = Console.ReadLine();
+                Console.WriteLine("Do you want to show the data? (Yes/No):");
 
-                choice = choice.Trim().ToLower(); // Entfernt Leerzeichen und konvertiert in Kleinbuchstaben
+                try
+                {
+                    choice = Console.ReadLine();
 
-                if (choice == "yes")
-                {
-                    ShowFileContents(); // Zeigt die Datei an
+                    // Entferne Leerzeichen und konvertiere in Kleinbuchstaben
+                    choice = choice.Trim().ToLower();
+
+                    if (choice == "yes")
+                    {
+                        ShowFileContents(); // Zeigt die Datei an
+                        isValidInput = true; // Gültige Eingabe -> Schleife beenden
+                    }
+                    else if (choice == "no")
+                    {
+                        Console.WriteLine("Contents will not be displayed.");
+                        isValidInput = true; // Gültige Eingabe -> Schleife beenden
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid input. Please enter 'Yes' or 'No'.");
+                        // isValidInput bleibt "false", daher läuft die Schleife weiter
+                    }
                 }
-                else if (choice == "no")
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Contents will not be displayed.");
+                    Console.WriteLine("Error: " + ex.Message);
+                    // Bei einer Exception kann die Schleife erneut die Eingabe anfordern
                 }
-                else
-                {
-                    Console.WriteLine("Invalid input. Please enter 'Yes' or 'No'.");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error: " + ex.Message);
-            }
+
+            } while (!isValidInput); // Schleife wiederholen, solange die Eingabe ungültig ist
         }
 
-        // Methode zur Anzeige des Dateiinhalts
-        private void ShowFileContents()
+            // Methode zur Anzeige des Dateiinhalts
+            private void ShowFileContents()
         {
             Console.WriteLine("Contents of the file:");
             foreach (var line in _fileModel.Lines)
@@ -89,7 +105,7 @@ namespace AsyncProgramming.Controllers
                 {
                     lineCount++; // Erhöht die Zeilenanzahl
                 }
-            }
+            } // Hier wird der StreamReader automatisch geschlossen, wenn der Block verlassen wird (wegen using)
             return lineCount;
         }
 
@@ -102,6 +118,7 @@ namespace AsyncProgramming.Controllers
             using (var reader = new StreamReader(filePath))
             {
                 string line;
+                // Diese Schleife liest so lange ein und gibt den Fortschritt aus bis Ende der Datei
                 while ((line = reader.ReadLine()) != null)
                 {
                     _fileModel.Lines.Add(line); // Füge die Zeile zur Liste hinzu
@@ -116,6 +133,30 @@ namespace AsyncProgramming.Controllers
                         Console.WriteLine($"Progress: {progress}%");
                         lastProgress = progress; // Aktualisiere den letzten Fortschrittswert
                     }
+                }
+            }
+        }
+        /// <summary>
+        /// Zeigt den OpenFileDialog an und gibt den Pfad der ausgewählten Datei zurück.
+        /// </summary>
+        /// <returns>Der Dateipfad oder null, wenn keine Datei ausgewählt wurde.</returns>
+        public static string SelectFile()
+        {
+            // OpenFileDialog muss in einem synchronen STA-Thread aufgerufen werden
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                openFileDialog.Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+                openFileDialog.Title = "Select a text file";
+
+                // Datei-Auswahl über OpenFileDialog
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    return openFileDialog.FileName; // Rückgabe des Dateipfads
+                }
+                else
+                {
+                    return null; // Rückgabe von null, wenn keine Datei ausgewählt wurde
                 }
             }
         }
